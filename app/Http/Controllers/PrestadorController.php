@@ -7,20 +7,31 @@ use Exception;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Bus\DispatchesJobs;
 use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 
 class PrestadorController extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-    public function teste()
+    public function ListaPrestador(Request $request)
     {
-        $resultados = RedeBrasil::selectRaw('CRO_UF_CRO, cast(CPF_CNPJ as varchar(50)) as CPFCPNJ, Nome, concat(DDD , TELEFONE) as telefone, concat(DDD2 , Celular) as celular, Endereco, Bairro, CEP, Cidade, Estado, Emergência, 24_horas, Singular, Area_de_atuacao, Especialista')->get();
+        $query = RedeBrasil::query();
+        // Filtro de estado
+        if ($request->has('Estado')) {
+            $query->where('Estado', 'LIKE', '%' . $request->Estado . '%');
+            // Filtro de cidade
+            if ($request->has('Cidade')) {
+                $query->where('Cidade', 'LIKE', '%' . $request->Cidade . '%');
+            }
+            // Paginando as cidades
+            $teste = $query->paginate();
 
-        if (!$resultados) {
-            throw new Exception("Nenhum prestador encontrado!");
+            return $teste;
         }
+        // Paginando os estados
+        $teste = $query->paginate();
 
-        return $resultados;
+        return $teste;
     }
 }
